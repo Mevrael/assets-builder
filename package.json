@@ -1,0 +1,44 @@
+{
+  "name": "assets-builder",
+  "version": "0.0.1",
+  "description": "Assets builder. Build modern assets, JS, CSS, SVGs, transpile ES6 to ES5, CSSNext to CSS3, compress, minify, etc with simple node scripts and CLI.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node build.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mevrael/assets-builder.git"
+  },
+  "keywords": [
+    "JavaScript",
+    "ECMAScript",
+    "ECMAScript6",
+    "assets builder"
+  ],
+  "author": "Mev-Rael (mevrael@gmail.com)",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Mevrael/assets-builder/issues"
+  },
+  "homepage": "https://github.com/Mevrael/assets-builder#readme",
+  "dependencies": {
+    "babel-eslint": "^7.0.0",
+    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "clean-css": "^3.4.20",
+    "colors": "^1.1.2",
+    "cssnano": "^3.7.6",
+    "eslint-config-airbnb-base": "^8.0.0",
+    "eslint-plugin-import": "^2.0.0",
+    "postcss": "^5.2.4",
+    "postcss-cssnext": "^2.8.0",
+    "postcss-import": "^8.1.2",
+    "rollup": "^0.36.0",
+    "rollup-plugin-babel": "^2.6.1",
+    "rollup-plugin-eslint": "^3.0.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
+    "uglify-js": "^2.7.3"
+  }
+}
