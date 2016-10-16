@@ -9,6 +9,7 @@ const resolve = require('rollup-plugin-node-resolve');
 const eslint = require('rollup-plugin-eslint');
 const uglify = require('uglify-js');
 const fs = require("fs");
+const path = require("path");
 
 const ASSETS_FOLDER_JS = Config.srcPathJs;
 const PUBLIC_BUILD_FOLDER = Config.buildPathJs;
@@ -18,9 +19,9 @@ const plugins = [
 
   babel({
     babelrc: false,
-    //exclude: 'node_modules/**',
+    //exclude: 'node_modules/!**',
     presets: [
-      ["es2015", {"modules": false}],
+      'es2015-rollup',
       'stage-0'
     ]
   }),
@@ -31,12 +32,42 @@ const plugins = [
   })
 ];
 
-/*if (isProduction) {
-  const uglify = require("rollup-plugin-uglify");
-  plugins.push(uglify);
-}*/
+function removeLines(file) {
 
-function buildJs(appEntryFile, file = null, destFile = null) {
+  return new Promise(resolve => {
+    const fs = require('fs');
+    const readline = require('readline');
+    const stream = require('stream');
+
+    const instream = fs.createReadStream(file);
+    const outstream = new stream;
+    const rl = readline.createInterface(instream, outstream);
+
+    const lines = [];
+
+    rl.on('line', function(line) {
+
+      if (line.indexOf('import') !== 0 && line.indexOf('export') !== 0) {
+        lines.push(line);
+      }
+
+    });
+
+    rl.on('close', function() {
+
+      const str = fs.createWriteStream(file);
+      lines.forEach(line => {
+        str.write(line + "\n");
+      });
+      str.end();
+      resolve();
+
+    });
+  })
+
+}
+
+function buildJs(appEntryFile, file = null, destFile = null, excludeFiles = []) {
   return new Promise((res, reject) => {
     if (file === null) {
       file = ASSETS_FOLDER_JS + '/' + appEntryFile + '.js';
@@ -44,21 +75,28 @@ function buildJs(appEntryFile, file = null, destFile = null) {
     if (destFile === null) {
       destFile = PUBLIC_BUILD_FOLDER + '/' + appEntryFile + '.js';
     }
+
+    const external = excludeFiles.map(item => path.resolve(item));
+
     console.log(colors.yellow('Bundling JS file: ' + file));
     rollup.rollup({
       dest: destFile,
       entry: file,
-      format: 'iife',
-      //treeshake: false,
+      external: external,
+      //format: 'iife',
+      treeshake: false,
       plugins: plugins,
       sourceMap: true
     }).then(function(bundle) {
       // write bundle to a file and use the IIFE format so it executes immediately
       return bundle.write({
-        format: 'cjs',
+        //format: 'cjs',
         dest: destFile
       });
     }).then(function() {
+      // remove imports and exports
+      return removeLines(destFile);
+    }).then(() => {
       if (isProduction) {
         const res = uglify.minify(destFile, {
           compress: {
