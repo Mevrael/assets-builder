@@ -60,7 +60,9 @@ function removeLines(file) {
         str.write(line + "\n");
       });
       str.end();
-      resolve();
+      str.on('close', () => {
+        resolve();
+      })
 
     });
   })
@@ -83,27 +85,22 @@ function buildJs(appEntryFile, file = null, destFile = null, excludeFiles = []) 
       dest: destFile,
       entry: file,
       external: external,
-      //format: 'iife',
       treeshake: false,
       plugins: plugins,
       sourceMap: true
-    }).then(function(bundle) {
-      // write bundle to a file and use the IIFE format so it executes immediately
-      return bundle.write({
-        //format: 'cjs',
-        dest: destFile
-      });
-    }).then(function() {
-      // remove imports and exports
+    }).then((bundle) => {
+      const rollupDone = bundle.generate();
+      fs.writeFileSync(destFile, rollupDone.code);
+
       return removeLines(destFile);
     }).then(() => {
       if (isProduction) {
-        const res = uglify.minify(destFile, {
+        const minified = uglify.minify(destFile, {
           compress: {
-            drop_console: true
+            drop_console: true,
           }
         });
-        fs.writeFile(destFile, res.code, 'utf-8');
+        fs.writeFile(destFile, minified.code, 'utf-8');
       }
       console.log(colors.green(`  ${isProduction ? 'Minified ' : ''}JS Bundle created: ${destFile}`));
       res();
