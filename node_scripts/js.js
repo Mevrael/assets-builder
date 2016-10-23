@@ -21,7 +21,12 @@ const plugins = [
     babelrc: false,
     //exclude: 'node_modules/!**',
     presets: [
-      'es2015-rollup',
+      [
+        "es2015",
+        {
+          "modules": false
+        }
+      ],
       'stage-0'
     ]
   }),
