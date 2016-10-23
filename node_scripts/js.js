@@ -28,7 +28,8 @@ const plugins = [
         }
       ],
       'stage-0'
-    ]
+    ],
+    plugins: ["external-helpers"]
   }),
 
   resolve({
