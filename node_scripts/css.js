@@ -1,45 +1,61 @@
 
-const core = require('./core');
-const Config = require('./config');
-
 const fs = require('fs');
+
+const colors = require('colors/safe');
+
 const postcss = require('postcss');
 const cssnext = require('postcss-cssnext');
 const cssimport = require('postcss-import');
+const CleanCSS = require('clean-css');
+const stylelint = require('stylelint');
+const reporter = require('postcss-reporter');
 
-if (core.isProduction) {
-  const CleanCSS = require('clean-css');
-}
+const CSS = {
 
-const ASSETS_FOLDER_CSS = Config.srcPathCss;
-const PUBLIC_BUILD_FOLDER = Config.buildPathCss;
+  srcPath: '',
+  buildPath: '',
+  isProduction: false,
 
-function buildCss(file) {
-  return new Promise((resolve, reject) => {
-    const srcPath = `${ASSETS_FOLDER_CSS}/${file}.css`;
-    const destPath = `${PUBLIC_BUILD_FOLDER}/${file}.css`;
-    const input = fs.readFileSync(srcPath, 'utf8');
-    console.log(core.colors.yellow(`Bundling CSS file: ${srcPath}`));
-    postcss()
-      .use(cssimport)
-      .use(cssnext)
-      .process(input, {
-        from: srcPath,
-        to: destPath,
-      })
-      .then((result) => {
-        let text = result.css;
-        if (core.isProduction) {
-          text = new CleanCSS().minify(result.css).styles;
-        }
-        fs.writeFileSync(destPath, text);
-        console.log(core.colors.green(`  CSS bundle created: ${destPath}`));
-        resolve();
-      }).catch(e => {
-        console.error(core.colors.red(`Error: ${e.message}`));
-        reject();
+  run(args, isProduction, Config) {
+    this.srcPath = Config.srcPathJs;
+    this.buildPath = Config.buildPathJs;
+    this.isProduction = isProduction;
+
+    const file = args.length === 0 ? 'app' : args[0];
+
+    return this.makeFile(file);
+  },
+
+  makeFile(file) {
+    return new Promise((resolve, reject) => {
+      const srcPath = `${this.srcPath}/${file}.css`;
+      const destPath = `${this.buildPath}/${file}.css`;
+      const input = fs.readFileSync(srcPath, 'utf8');
+      console.log(colors.yellow(`    Bundling CSS file: ${srcPath}`));
+      postcss()
+        .use(stylelint)
+        .use(cssimport)
+        .use(cssnext)
+        .use(reporter({ clearMessages: true }))
+        .process(input, {
+          from: srcPath,
+          to: destPath,
+        })
+        .then((result) => {
+          let text = result.css;
+          if (this.isProduction) {
+            text = new CleanCSS().minify(result.css).styles;
+          }
+          fs.writeFileSync(destPath, text);
+          console.log(colors.green(`    CSS bundle created: ${destPath}`));
+          resolve();
+        })
+        .catch((e) => {
+          reject(e);
+        });
     });
-  })
-}
+  },
 
-module.exports = buildCss;
+};
+
+module.exports = CSS;

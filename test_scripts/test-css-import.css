@@ -1,0 +1,17 @@
+
+:root {
+    --body-bg-color: 'red';
+    --body-bg-color-sm: 'blue';
+
+    ---box: {
+        color: white;
+        background-color: red;
+        border-radius: 4px;
+        border: 1px solid #999;
+        box-shadow: 1px 1px 3px 3px #444;
+    };
+}
+
+@custom-selector :--heading h1, h2, h3;
+
+@custom-media --sm (width >= 500px) and (width <= 1200px);

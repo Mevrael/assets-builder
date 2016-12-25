@@ -1,23 +1,28 @@
 
 const fs = require('fs');
 const path = require('path');
-const Config = require('./config');
-const Core = require('./core');
+
+const colors = require('colors/safe');
 
 const Version = {
-
-  _manifestPath: Config.versionManifestPath,
-  _buildPath: Config.buildPath,
+  _manifestPath: '',
+  _buildPath: '',
 
   /**
    * Generates a versioned file and updates or creates manifest file
    * @param {String|Array} file
    * @returns {Version}
    */
-  add(file) {
-    const timeStarted = Date.now();
+  run(args, isProduction, Config) {
+    this._manifestPath = Config.versionManifestPath;
+    this._buildPath = Config.buildPath;
 
-    console.log(Core.colors.yellow('  Generating versioned files...'));
+    if (args.length === 0) {
+      args = ['app.css', 'app.js'];
+    }
+
+    this._checkOriginalFileExists(args);
+
     let data = '';
     try {
       data = fs.readFileSync(this._manifestPath, 'utf8');
@@ -26,28 +31,24 @@ const Version = {
       // Manifest file doesn't exists
       data = {};
     }
-    if (Array.isArray(file)) {
-      file.forEach(f => {
-        data[f] = this._processFile(data, f);
-      });
-    } else {
+
+
+
+    args.forEach(file => {
       data[file] = this._processFile(data, file);
-    }
+    });
 
     const json = JSON.stringify(data);
 
     fs.writeFileSync(this._manifestPath, json);
-    console.log(Core.colors.green(`    Manifest file "${this._manifestPath}" updated.`));
-    console.log('  Finished Version in ' + (Date.now() - timeStarted) + 'ms');
-
-    return this;
+    console.log(colors.green(`    Manifest file "${this._manifestPath}" updated.`));
   },
 
   _processFile(data, file) {
     this._checkAndDeleteOldVersionedFile(data, file);
     const versionedFileName = this._generateVersionedFileName(file);
     this._copyAndRenameFile(file, versionedFileName);
-    console.log(Core.colors.green(`    File "${this._buildPath + '/' + file}" versioned and saved in "${this._buildPath + '/' + versionedFileName}".`));
+    console.log(colors.green(`    File "${this._buildPath + '/' + file}" versioned and saved in "${this._buildPath + '/' + versionedFileName}".`));
     return versionedFileName;
   },
 
@@ -65,12 +66,26 @@ const Version = {
     };
   },
 
+  _checkOriginalFileExists(files) {
+    let err = false;
+    files.forEach(file => {
+      const originalFile = this._buildPath + '/' + file;
+      if (!fs.existsSync(originalFile)) {
+        console.error(colors.red('    Version: file "'+originalFile+'" not found!'));
+        err = true;
+      }
+    });
+    if (err) {
+      process.exit();
+    }
+  },
+
   _checkAndDeleteOldVersionedFile(data, file) {
     if (data[file] !== undefined) {
       try {
         const path = this._buildPath + '/' + data[file];
         fs.unlinkSync(path);
-        console.log(Core.colors.green(`    Old versioned file "${path}" removed.`));
+        console.log(colors.green(`    Old versioned file "${path}" removed.`));
       } catch (e) {
 
       }
@@ -98,7 +113,5 @@ const Version = {
   }
 
 };
-
-Version.add(['app.js', 'app.css']);
 
 module.exports = Version;

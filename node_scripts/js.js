@@ -1,120 +1,127 @@
 
-const isProduction = require('./core').isProduction;
-const Config = require('./config');
+const fs = require('fs');
+const path = require('path');
+const readLine = require('readline');
+const stream = require('stream');
+
 const colors = require('colors/safe');
 
 const rollup = require('rollup');
 const babel = require('rollup-plugin-babel');
 const resolve = require('rollup-plugin-node-resolve');
-const eslint = require('rollup-plugin-eslint');
+// const eslint = require('rollup-plugin-eslint');
 const uglify = require('uglify-js');
-const fs = require("fs");
-const path = require("path");
-
-const ASSETS_FOLDER_JS = Config.srcPathJs;
-const PUBLIC_BUILD_FOLDER = Config.buildPathJs;
 
 const plugins = [
-  eslint(),
+  // eslint(),
 
   babel({
     babelrc: false,
-    //exclude: 'node_modules/!**',
+    // exclude: 'node_modules/!**',
     presets: [
       [
-        "es2015",
+        'es2015',
         {
-          "modules": false
-        }
+          modules: false,
+        },
       ],
-      'stage-0'
+      'stage-0',
     ],
-    plugins: ["external-helpers"]
+    plugins: ['external-helpers'],
   }),
 
   resolve({
     browser: true,
-    main: true
-  })
+    main: true,
+  }),
 ];
 
-function removeLines(file) {
+const JS = {
+  srcPath: '',
+  buildPath: '',
+  isProduction: false,
 
-  return new Promise(resolve => {
-    const fs = require('fs');
-    const readline = require('readline');
-    const stream = require('stream');
+  run(args, isProduction, Config) {
+    this.srcPath = Config.srcPathJs;
+    this.buildPath = Config.buildPathJs;
+    this.isProduction = isProduction;
 
-    const instream = fs.createReadStream(file);
-    const outstream = new stream;
-    const rl = readline.createInterface(instream, outstream);
+    const entryFile = args.length === 0 ? 'app' : args[0];
 
-    const lines = [];
+    return this.makeFile(entryFile);
+  },
 
-    rl.on('line', function(line) {
+  removeLines(file) {
+    return new Promise((resolve) => {
 
-      if (line.indexOf('import') !== 0 && line.indexOf('export') !== 0) {
-        lines.push(line);
-      }
+      const instream = fs.createReadStream(file);
+      const outstream = new stream();
+      const rl = readLine.createInterface(instream, outstream);
 
-    });
+      const lines = [];
 
-    rl.on('close', function() {
-
-      const str = fs.createWriteStream(file);
-      lines.forEach(line => {
-        str.write(line + "\n");
+      rl.on('line', (line) => {
+        if (line.indexOf('import') !== 0 && line.indexOf('export') !== 0) {
+          lines.push(line);
+        }
       });
-      str.end();
-      str.on('close', () => {
-        resolve();
-      })
 
-    });
-  })
-
-}
-
-function buildJs(appEntryFile, file = null, destFile = null, excludeFiles = []) {
-  return new Promise((res, reject) => {
-    if (file === null) {
-      file = ASSETS_FOLDER_JS + '/' + appEntryFile + '.js';
-    }
-    if (destFile === null) {
-      destFile = PUBLIC_BUILD_FOLDER + '/' + appEntryFile + '.js';
-    }
-
-    const external = excludeFiles.map(item => path.resolve(item));
-
-    console.log(colors.yellow('Bundling JS file: ' + file));
-    rollup.rollup({
-      dest: destFile,
-      entry: file,
-      external: external,
-      treeshake: false,
-      plugins: plugins,
-      sourceMap: true
-    }).then((bundle) => {
-      const rollupDone = bundle.generate();
-      fs.writeFileSync(destFile, rollupDone.code);
-
-      return removeLines(destFile);
-    }).then(() => {
-      if (isProduction) {
-        const minified = uglify.minify(destFile, {
-          compress: {
-            drop_console: true,
-          }
+      rl.on('close', () => {
+        const str = fs.createWriteStream(file);
+        lines.forEach((line) => {
+          str.write(`${line}\n`);
         });
-        fs.writeFile(destFile, minified.code, 'utf-8');
-      }
-      console.log(colors.green(`  ${isProduction ? 'Minified ' : ''}JS Bundle created: ${destFile}`));
-      res();
-    }).catch(function(e) {
-      console.error(colors.red(`  Error: ${e.message}`));
-      reject();
+        str.end();
+        str.on('close', () => {
+          resolve();
+        });
+      });
     });
-  });
-}
+  },
 
-module.exports = buildJs;
+  makeFile(appEntryFile, file = null, destFile = null, excludeFiles = []) {
+    return new Promise((res, reject) => {
+      if (file === null) {
+        file = `${this.srcPath}/${appEntryFile}.js`;
+      }
+      if (destFile === null) {
+        destFile = `${this.buildPath}/${appEntryFile}.js`;
+      }
+
+      const external = excludeFiles.map(item => path.resolve(item));
+
+      console.log(colors.yellow(`    Bundling JS file: ${file}`));
+      rollup.rollup({
+        dest: destFile,
+        entry: file,
+        external,
+        treeshake: false,
+        plugins,
+        sourceMap: true,
+      }).then((bundle) => {
+        const rollupDone = bundle.generate();
+        fs.writeFileSync(destFile, rollupDone.code);
+
+        return this.removeLines(destFile);
+      }).then(() => {
+        if (this.isProduction) {
+          const minified = uglify.minify(destFile, {
+            compress: {
+              drop_console: true,
+            },
+          });
+          fs.writeFile(destFile, minified.code, 'utf-8', (err) => {
+            reject(err);
+          });
+        }
+        console.log(colors.green(`    ${this.isProduction ? 'Minified ' : ''}JS Bundle created: ${destFile}`));
+        res();
+      }).catch((e) => {
+        reject(e);
+      });
+    });
+  },
+
+};
+
+module.exports = JS;

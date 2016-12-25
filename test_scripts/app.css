@@ -1,0 +1,32 @@
+
+@import 'test-css-import.css';
+
+body {
+  background-color: var(--body-bg-color);
+}
+
+:--heading {
+  color: #345678;
+}
+
+a,
+b {
+  color: red;
+  border: 1px solid #f00;
+}
+
+.box {
+  @apply ---box;
+}
+
+.box-secondary {
+  @apply ---box;
+
+  background-color: #567;
+}
+
+@media (--sm) {
+  body {
+    background-color: var(--body-bg-color-sm);
+  }
+}

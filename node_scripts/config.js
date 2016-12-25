@@ -12,4 +12,10 @@ module.exports = {
 
   versionManifestPath: 'public/build/rev-manifest.json',
 
+  allCmds: [
+    'css',
+    'js',
+    'version app.css app.js',
+  ],
+
 };
