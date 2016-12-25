@@ -1,4 +1,4 @@
-# Bunny Assets Builder 0.1 (Alpha)
+# Bunny Assets Builder 0.1.1 (Alpha)
 
 #### Node scripts and custom CLI made easy
 

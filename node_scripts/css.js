@@ -17,8 +17,8 @@ const CSS = {
   isProduction: false,
 
   run(args, isProduction, Config) {
-    this.srcPath = Config.srcPathJs;
-    this.buildPath = Config.buildPathJs;
+    this.srcPath = Config.srcPathCss;
+    this.buildPath = Config.buildPathCss;
     this.isProduction = isProduction;
 
     const file = args.length === 0 ? 'app' : args[0];
