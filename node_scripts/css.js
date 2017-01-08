@@ -7,7 +7,7 @@ const postcss = require('postcss');
 const cssnext = require('postcss-cssnext');
 const cssimport = require('postcss-import');
 const CleanCSS = require('clean-css');
-const stylelint = require('stylelint');
+//const stylelint = require('stylelint');
 const reporter = require('postcss-reporter');
 
 const CSS = {
@@ -33,7 +33,7 @@ const CSS = {
       const input = fs.readFileSync(srcPath, 'utf8');
       console.log(colors.yellow(`    Bundling CSS file: ${srcPath}`));
       postcss()
-        .use(stylelint)
+        //.use(stylelint)
         .use(cssimport)
         .use(cssnext)
         .use(reporter({ clearMessages: true }))

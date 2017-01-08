@@ -1,4 +1,4 @@
-# Bunny Assets Builder 0.1.1 (Alpha)
+# Bunny Assets Builder 0.1.2 (Alpha)
 
 #### Node scripts and custom CLI made easy
 
@@ -153,6 +153,15 @@ CLI.registerCmd('hi', 'My first command', [], (args, isProduction, Config) => {
 });
 
 CLI.run();
+```
+
+## Custom "all" command (Sequence of commands)
+
+```javascript
+CLI.registerAllCmd('css-admin', 'Bundle and version admin CSS', [], [
+  'css admin',
+  'version admin.css'
+]);
 ```
 
 ## Custom Node scripts

@@ -37,14 +37,7 @@ const CLI = {
   },
 
   initAll() {
-    this.registerCmd('all', 'Bundle JS, CSS and run Version', [], () => {
-      const cmds = [];
-      this.Config.allCmds.forEach(argStr => {
-        const args = argStr.split(' ');
-        cmds.push(this.run.bind(this, args));
-      });
-      return cmds.reduce((p, fn) => p.then(fn), Promise.resolve());
-    });
+    this.registerAllCmd('all', 'Bundle JS, CSS and run Version', [], this.Config.allCmds);
   },
 
   // initSvg() {
@@ -83,9 +76,9 @@ const CLI = {
 
           console.log(colors.yellow('  Running ' + colors.magenta(cmdName) + '...'));
           if (typeof cmd === 'function') {
-            cmdRes = cmd(this.getCmdArgs(), this.isProduction(), this.Config);
+            cmdRes = cmd(this.getCmdArgs(params), this.isProduction(), this.Config);
           } else {
-            cmdRes = cmd['run'](this.getCmdArgs(), this.isProduction(), this.Config);
+            cmdRes = cmd['run'](this.getCmdArgs(params), this.isProduction(), this.Config);
           }
           if (cmdRes instanceof Promise) {
             cmdRes.then(() => {
@@ -107,13 +100,22 @@ const CLI = {
     });
   },
 
+  runAll(allCmds) {
+    const cmds = [];
+    allCmds.forEach(argStr => {
+      const args = argStr.split(' ');
+      cmds.push(this.run.bind(this, args));
+    });
+    return cmds.reduce((p, fn) => p.then(fn), Promise.resolve());
+  },
+
   getArgs() {
     const args = Array.from(process.argv);
     return args.splice(process.execArgv.length + 2);
   },
 
-  getCmdArgs() {
-    const args = this.getArgs().splice(1);
+  getCmdArgs(params) {
+    const args = params.splice(1);
     const newArgs = [];
     args.forEach(arg => {
       if (!this.isArgProduction(arg)) {
@@ -196,6 +198,11 @@ const CLI = {
     }
   },
 
+  registerAllCmd(name, description, params = [], allCmds) {
+    this.registerCmd(name, description, params, () => {
+      return this.runAll(allCmds);
+    });
+  }
 
 };
 

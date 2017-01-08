@@ -12,4 +12,9 @@ CLI.init();
 //   console.log('My 1st cmd executed :)');
 // });
 
+CLI.registerAllCmd('css-admin', 'Bundle and version admin CSS', [], [
+  'css admin',
+  'version admin.css'
+]);
+
 CLI.run();
