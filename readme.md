@@ -1,4 +1,6 @@
-# Bunny Assets Builder 0.1.2 (Alpha)
+# Bunny Assets Builder 0.1.3 (Alpha)
+
+[Website](https://bunnyjs.com) [![NPM downloads/month](http://img.shields.io/npm/dm/assets-builder.svg?style=flat-square)](https://www.npmjs.org/package/assets-builder) [![NPM version](http://img.shields.io/npm/v/assets-builder.svg?style=flat-square)](https://www.npmjs.org/package/assets-builder) 
 
 #### Node scripts and custom CLI made easy
 

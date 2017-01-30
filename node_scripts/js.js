@@ -40,6 +40,7 @@ const JS = {
   srcPath: '',
   buildPath: '',
   isProduction: false,
+  plugins: plugins,
 
   run(args, isProduction, Config) {
     this.srcPath = Config.srcPathJs;
@@ -96,7 +97,7 @@ const JS = {
         entry: file,
         external,
         treeshake: false,
-        plugins,
+        plugins: this.plugins,
         sourceMap: true,
       }).then((bundle) => {
         const rollupDone = bundle.generate();
@@ -111,11 +112,17 @@ const JS = {
             },
           });
           fs.writeFile(destFile, minified.code, 'utf-8', (err) => {
-            reject(err);
+            if (err) {
+              reject(err);
+            } else {
+              console.log(colors.green(`    Minified JS Bundle created: ${destFile}`));
+              res();
+            }
           });
+        } else {
+          console.log(colors.green(`    JS Bundle created: ${destFile}`));
+          res();
         }
-        console.log(colors.green(`    ${this.isProduction ? 'Minified ' : ''}JS Bundle created: ${destFile}`));
-        res();
       }).catch((e) => {
         reject(e);
       });
