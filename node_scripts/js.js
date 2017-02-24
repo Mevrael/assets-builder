@@ -17,6 +17,7 @@ const plugins = [
 
   babel({
     babelrc: false,
+    externalHelpers: true,
     // exclude: 'node_modules/!**',
     presets: [
       [
