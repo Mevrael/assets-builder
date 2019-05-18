@@ -1,6 +1,6 @@
-# Bunny Assets Builder 0.1.5 (Alpha)
+# Bunny Assets Builder 0.1.6 (Alpha)
 
-[Website](https://bunnyjs.com) [![NPM downloads/month](http://img.shields.io/npm/dm/assets-builder.svg?style=flat-square)](https://www.npmjs.org/package/assets-builder) [![NPM version](http://img.shields.io/npm/v/assets-builder.svg?style=flat-square)](https://www.npmjs.org/package/assets-builder) 
+[Website](https://bunnyjs.com) [![NPM downloads/month](http://img.shields.io/npm/dm/assets-builder.svg?style=flat-square)](https://www.npmjs.org/package/assets-builder) [![NPM version](http://img.shields.io/npm/v/assets-builder.svg?style=flat-square)](https://www.npmjs.org/package/assets-builder)
 
 #### Node scripts and custom CLI made easy
 
@@ -30,7 +30,7 @@ CLI.registerCmd('hello', 'Say hello', [], () => {
 ```
 and you may use now new command by running `node build hello`;
 
-By defaults Assets Builder allows building modern web projects out of the box: 
+By defaults Assets Builder allows building modern web projects out of the box:
 - Transpile ES6 to ES5 using Babel and Rollup;
 - Transpile Future CSS (CSS4) with PostCSS and CSSNext;
 - Compress, minify assets for production by adding `-p` flag;
@@ -192,7 +192,7 @@ const Hello = {
 
     return this.sayHello(name);
   },
-  
+
   sayHello(name) {
     console.log(colors.green(`Hello, ${name}`);
   }
